@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Stardust - Gesture Controlled</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050510; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        canvas { display: block; }
+        
+        /* UI Container - Glassmorphism */
+        #ui-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 220px; /* Reduced width from 280px */
+            padding: 15px; /* Reduced padding */
+            background: rgba(20, 30, 40, 0.5); /* Slightly more transparent */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        /* Toggle Button */
+        #toggle-ui {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 32px;
+            height: 32px;
+            background: #ff4d4d;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        #toggle-ui:hover {
+            transform: scale(1.1);
+            background: #ff6666;
+        }
+        #toggle-ui svg {
+            fill: currentColor;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Collapsed State */
+        #ui-container.collapsed {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            overflow: hidden;
+            background: rgba(20, 30, 40, 0.8);
+            border-radius: 50%;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        #ui-container.collapsed > *:not(#toggle-ui) {
+            display: none !important;
+        }
+        #ui-container.collapsed #toggle-ui {
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem; /* Smaller title */
+            font-weight: 300;
+            text-align: center;
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .control-group { margin-bottom: 10px; } /* Tighter spacing */
+        label { display: block; font-size: 0.75rem; margin-bottom: 3px; color: #aaccff; }
+        
+        /* Sliders */
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            margin: 4px 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px; /* Smaller thumb */
+            width: 12px;
+            border-radius: 50%;
+            background: #ff4d4d;
+            cursor: pointer;
+            margin-top: -4px;
+            box-shadow: 0 0 5px #ff4d4d;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 3px; /* Thinner track */
+            cursor: pointer;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+        }
+
+        /* Color Picker */
+        input[type=color] {
+            width: 100%;
+            height: 25px; /* Smaller height */
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        /* Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px; /* Tighter gap */
+            margin-top: 8px;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 6px 4px; /* Smaller padding */
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.7rem; /* Smaller font */
+        }
+        button:hover, button.active {
+            background: rgba(255, 77, 77, 0.6); 
+            border-color: #ff4d4d;
+            box-shadow: 0 0 8px rgba(255, 77, 77, 0.3);
+        }
+
+        /* Drawing Canvas Overlay - Restored */
+        #draw-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            cursor: crosshair;
+            display: none; /* Hidden by default */
+        }
+
+        .status {
+            font-size: 0.75rem;
+            color: #00ff88;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .instruction {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 5px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        #video-feed {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 160px;
+            height: 120px;
+            border-radius: 8px;
+            opacity: 0.8;
+            transform: scaleX(-1); /* Mirror */
+            border: 2px solid rgba(255,255,255,0.2);
+            z-index: 90;
+        }
+    </style>
+    <!-- Import Maps for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <!-- MediaPipe Scripts (Load dynamically to ensure order) -->
+    <script src="https://unpkg.com/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="ui-container">
+        <button id="toggle-ui" onclick="toggleUI()" title="Toggle Settings">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>
+        </button>
+        <h1>🎄 Stardust</h1>
+        
+        <div class="control-group">
+            <label>Color (Theme)</label>
+            <input type="color" id="colorPicker" value="#00ff88">
+        </div>
+
+        <div class="control-group">
+            <label>Particle Density</label>
+            <input type="range" id="densitySlider" min="0.1" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+            <label>Explosion Force (Hand Open)</label>
+            <input type="range" id="diffusionSlider" min="0.1" max="3.0" step="0.1" value="1.5">
+        </div>
+
+        <label>Shapes</label>
+        <div class="btn-grid">
+            <button onclick="setShape('tree')" class="active">Christmas Tree</button>
+            <button onclick="setShape('star')">Bethlehem Star</button>
+            <button onclick="setShape('heart')">Warm Heart</button>
+            <button onclick="setShape('sphere')">Snowball</button>
+        </div>
+        
+        <!-- Draw Button Restored -->
+        <div style="margin-top: 15px;">
+            <button id="drawBtn" onclick="setupDrawing()" style="width: 100%; background: #ffaa00; color: #000; font-weight: bold;">✏️ Draw Custom Shape</button>
+        </div>
+
+        <div class="status" id="handStatus">Waiting for camera...</div>
+        <div class="instruction">Open Hand = Explode | Fist = Form Shape</div>
+    </div>
+
+    <canvas id="draw-canvas"></canvas>
+    <video id="video-feed" playsinline></video>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+        // --- Configuration ---
+        const CONFIG = {
+            particleCount: 50000,
+            baseColor: new THREE.Color('#00ff88'),
+            particleSize: 0.15,
+            lerpSpeed: 0.08,
+            handInteractionRadius: 3.0
+        };
+
+        // --- State ---
+        let scene, camera, renderer, controls;
+        let particles, geometry, material;
+        let targetPositions = []; // Float32Array
+        let targetColors = []; // Float32Array
+        let currentPositions = []; // Float32Array (stored in geometry)
+        let handClosed = false;
+        let handOpenness = 0; // 0 (closed) to 1 (open)
+        let handPosition = new THREE.Vector3(0, 0, 0);
+        let time = 0;
+        
+        // App Logic State
+        let appState = 'TREE'; // TREE, EXPLODED, BOX, BOX_OPENING, TEXT
+        let stateTimer = 0;
+        let font = null;
+        
+        // Hand Control State
+        let handRotationVelX = 0;
+        let handRotationVelY = 0;
+        let lastHandX = null;
+        let lastHandY = null;
+        let currentScale = 1.0;
+        let targetScale = 1.0;
+        let savedDrawnPoints = null; // Store user drawing
+
+        // --- Initialization ---
+        function init() {
+            // Scene Setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050510, 0.02);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 25;
+            camera.position.y = 5;
+            camera.lookAt(0,0,0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+
+            // Controls - Removed OrbitControls
+
+            // Load Font
+            const loader = new FontLoader();
+            loader.load(
+                'https://unpkg.com/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json',
+                function ( response ) {
+                    font = response;
+                    console.log('Font loaded successfully');
+                },
+                undefined,
+                function ( err ) {
+                    console.error('Font loading failed:', err);
+                }
+            );
+
+            // Background Stars
+            createBackgroundStars();
+
+            // Main Particle System
+            createParticles();
+
+            // Initial Shape
+            setShape('tree');
+
+            // Events
+            window.addEventListener('resize', onWindowResize);
+            setupUI();
+            
+            // Start Animation
+            animate();
+        }
+
+        // --- Particle System ---
+        function createParticles() {
+            geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(CONFIG.particleCount * 3);
+            const randoms = new Float32Array(CONFIG.particleCount);
+            const colors = new Float32Array(CONFIG.particleCount * 3);
+
+            const colorObj = new THREE.Color(CONFIG.baseColor);
+
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+                randoms[i] = Math.random();
+
+                colors[i * 3] = colorObj.r;
+                colors[i * 3 + 1] = colorObj.g;
+                colors[i * 3 + 2] = colorObj.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            // Shader Material for "Glowing Snow/Stardust" look
+            material = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uSize: { value: CONFIG.particleSize * window.innerHeight },
+                    // uColor removed, using vertex colors
+                },
+                vertexShader: `
+                    uniform float uTime;
+                    uniform float uSize;
+                    uniform float uHandEffect;
+                    uniform vec3 uHandPos;
+                    attribute float aRandom;
+                    attribute vec3 color;
+                    varying vec3 vColor;
+                    varying float vDist;
+
+                    void main() {
+                        vColor = color;
+                        vec3 pos = position;
+
+                        // Subtle breathing animation
+                        float breathing = sin(uTime * 2.0 + aRandom * 10.0) * 0.1;
+                        pos += normal * breathing;
+
+                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                        gl_Position = projectionMatrix * mvPosition;
+
+                        // Size attenuation based on depth
+                        gl_PointSize = uSize * (1.0 / -mvPosition.z);
+                        
+                        // Twinkle size
+                        gl_PointSize *= (0.8 + 0.4 * sin(uTime * 5.0 + aRandom * 100.0));
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vColor;
+                    void main() {
+                        // Circular soft particle
+                        vec2 xy = gl_PointCoord.xy - vec2(0.5);
+                        float r = length(xy);
+                        if (r > 0.5) discard;
+
+                        // Soft glow edge
+                        float glow = 1.0 - (r * 2.0);
+                        glow = pow(glow, 1.5);
+
+                        gl_FragColor = vec4(vColor, glow);
+                    }
+                `,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // Initialize position arrays
+            targetPositions = new Float32Array(CONFIG.particleCount * 3);
+            targetColors = new Float32Array(CONFIG.particleCount * 3);
+            // Initially match current
+            for(let i=0; i<positions.length; i++) {
+                targetPositions[i] = positions[i];
+                targetColors[i] = colors[i];
+            }
+        }
+
+        function createBackgroundStars() {
+            const bgGeo = new THREE.BufferGeometry();
+            const bgCount = 2000;
+            const bgPos = new Float32Array(bgCount * 3);
+            for(let i=0; i<bgCount*3; i++) {
+                bgPos[i] = (Math.random() - 0.5) * 200;
+            }
+            bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+            const bgMat = new THREE.PointsMaterial({
+                color: 0xaaaaaa,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.6
+            });
+            const bgStars = new THREE.Points(bgGeo, bgMat);
+            scene.add(bgStars);
+        }
+
+        // --- Shape Generators ---
+        function setShape(type) {
+            const positions = targetPositions;
+            const colors = targetColors;
+            const count = CONFIG.particleCount;
+
+            // Helper for color assignment
+            const setPColor = (i, r, g, b) => {
+                colors[i*3] = r;
+                colors[i*3+1] = g;
+                colors[i*3+2] = b;
+            };
+
+            if (type === 'tree') {
+                // Realistic Multi-Layered Christmas Tree
+                const layers = 8;
+                let particleIdx = 0;
+                
+                // Tree Body (Cones)
+                for (let l = 0; l < layers; l++) {
+                    const layerHeight = 3.5;
+                    const yStart = 9 - l * 2.5; // Shifted up by 4 (was 5) -> 9
+                    const baseRadius = 1.5 + l * 1.5;
+                    
+                    const particlesInLayer = Math.floor(count * 0.85 / layers);
+                    
+                    for (let j = 0; j < particlesInLayer; j++) {
+                        if (particleIdx >= count) break;
+
+                        const t = Math.random(); // Height in layer (0-1)
+                        const angle = Math.random() * Math.PI * 2;
+                        const r = Math.sqrt(Math.random()) * baseRadius * (1.0 + t * 0.2 - t); // Tapered
+                        
+                        const x = Math.cos(angle) * r;
+                        const z = Math.sin(angle) * r;
+                        const y = yStart - t * layerHeight;
+
+                        positions[particleIdx*3] = x;
+                        positions[particleIdx*3+1] = y;
+                        positions[particleIdx*3+2] = z;
+
+                        // Color Logic:
+                        // 80% Green (Leaves), 10% Red (Ornaments), 5% Gold (Lights), 5% White (Snow)
+                        const rnd = Math.random();
+                        if (rnd > 0.95) setPColor(particleIdx, 1.0, 1.0, 1.0); // Snow
+                        else if (rnd > 0.90) setPColor(particleIdx, 1.0, 0.8, 0.2); // Gold
+                        else if (rnd > 0.80) setPColor(particleIdx, 0.9, 0.1, 0.1); // Red
+                        else setPColor(particleIdx, 0.1 + Math.random()*0.1, 0.5 + Math.random()*0.3, 0.1 + Math.random()*0.1); // Green Var
+
+                        particleIdx++;
+                    }
+                }
+
+                // Star on Top
+                const starCount = count - particleIdx;
+                for (let k = 0; k < starCount; k++) {
+                     const u = Math.random() * Math.PI * 2;
+                     const v = Math.random() * Math.PI;
+                     const r = 0.8;
+                     positions[particleIdx*3] = r * Math.sin(v) * Math.cos(u);
+                     positions[particleIdx*3+1] = 10 + r * Math.sin(v) * Math.sin(u); // Shifted up to 10
+                     positions[particleIdx*3+2] = r * Math.cos(v);
+                     setPColor(particleIdx, 1.0, 1.0, 0.4); // Bright Yellow
+                     particleIdx++;
+                }
+
+            } else if (type === 'box') {
+                // Gift Box: Red Cube with Yellow Ribbons & Bow
+                const S = 6; // Half-size of the box
+                const ribbonWidth = 1.2;
+                
+                // Reserve some particles for the bow
+                const bowParticles = 1500;
+                const boxParticles = count - bowParticles;
+                
+                let particleIdx = 0;
+
+                // 1. Box Body + Ribbons
+                for(let i=0; i<boxParticles; i++) {
+                     // Generate point on surface of cube
+                     let face = Math.floor(Math.random() * 6);
+                     let u = (Math.random() - 0.5) * 2 * S;
+                     let v = (Math.random() - 0.5) * 2 * S;
+                     let x, y, z;
+                     
+                     // 0: +x, 1: -x, 2: +y, 3: -y, 4: +z, 5: -z
+                     if (face === 0) { x=S; y=u; z=v; }
+                     else if (face === 1) { x=-S; y=u; z=v; }
+                     else if (face === 2) { x=u; y=S; z=v; }
+                     else if (face === 3) { x=u; y=-S; z=v; }
+                     else if (face === 4) { x=u; y=v; z=S; }
+                     else if (face === 5) { x=u; y=v; z=-S; }
+
+                     positions[particleIdx*3] = x;
+                     positions[particleIdx*3+1] = y;
+                     positions[particleIdx*3+2] = z;
+
+                     // Color Logic
+                     let isRibbon = false;
+                     // Ribbon on X faces
+                     if (Math.abs(x) >= S - 0.1) { 
+                        if (Math.abs(y) < ribbonWidth || Math.abs(z) < ribbonWidth) isRibbon = true;
+                     } 
+                     // Ribbon on Y faces
+                     else if (Math.abs(y) >= S - 0.1) { 
+                        if (Math.abs(x) < ribbonWidth || Math.abs(z) < ribbonWidth) isRibbon = true;
+                     } 
+                     // Ribbon on Z faces
+                     else { 
+                        if (Math.abs(x) < ribbonWidth || Math.abs(y) < ribbonWidth) isRibbon = true;
+                     }
+
+                     if (isRibbon) setPColor(particleIdx, 1.0, 0.9, 0.1); // Yellow Ribbon
+                     else setPColor(particleIdx, 0.9, 0.1, 0.1); // Red Body
+                     
+                     particleIdx++;
+                 }
+
+                 // 2. Bow Knot (Butterfly Shape on Top)
+                 // Two loops (lemniscate-ish) on XZ plane, lifted to Y=S
+                 for(let i=0; i<bowParticles; i++) {
+                     const t = (i / bowParticles) * Math.PI * 4; // 2 full circles
+                     const bowSize = 4.0;
+                     
+                     // Butterfly curve approximation or just sin/cos loops
+                     // Simple figure-8: x = sin(t), z = sin(t)*cos(t)
+                     // Let's use a "lemniscate of Bernoulli" style
+                     // r^2 = a^2 * cos(2theta)
+                     
+                     // Simpler approach: 2 loops
+                     // Loop 1: 0 to 2PI
+                     let angle = (i / bowParticles) * Math.PI * 2;
+                     
+                     // Parametric equation for a "bow" look
+                     // x = sin(t) * (e^cos(t) - 2cos(4t) - sin(t/12)^5) ? Too complex
+                     // Simple 4-leaf clover but only 2 leaves?
+                     // r = cos(2 * theta)
+                     
+                     let r = Math.sin(2 * angle) * bowSize; 
+                     // This creates 4 loops. We want 2 loops along X axis?
+                     // r = |sin(theta)|? No.
+                     
+                     // Let's use specific logic for left/right loops
+                     let x, z, y;
+                     
+                     if (Math.random() > 0.5) {
+                         // Loop part
+                         const u = Math.random() * Math.PI * 2;
+                         const rLoop = Math.sin(2 * u) * bowSize * 0.8;
+                         x = rLoop * Math.cos(u);
+                         z = rLoop * Math.sin(u) * 0.5; // Flatten Z to make it look like a bow tie
+                         y = S + 1.0 + Math.sin(u*2)*1.0; // Arch up
+                     } else {
+                         // Ribbon tails hanging down
+                         // Random point on tail
+                         const tTail = Math.random();
+                         const side = Math.random() > 0.5 ? 1 : -1;
+                         x = side * (0.5 + tTail * 1.0); // Offset from center
+                         y = S + 0.5 - tTail * 4.0; // Hang down
+                         z = (Math.random()-0.5) * 1.5;
+                         
+                         // Curve the tail
+                         x += Math.sin(y)*0.5;
+                         z += Math.cos(y)*0.5;
+                     }
+
+                     positions[particleIdx*3] = x;
+                     positions[particleIdx*3+1] = y;
+                     positions[particleIdx*3+2] = z;
+                     
+                     // Bright Yellow for Bow
+                     setPColor(particleIdx, 1.0, 1.0, 0.2);
+                     particleIdx++;
+                 }
+
+            } else if (type === 'santa') {
+                let pIdx = 0;
+                const count = CONFIG.particleCount;
+                
+                // Helper to add sphere
+                const addSphere = (cx, cy, cz, r, color, num) => {
+                     for(let k=0; k<num; k++) {
+                         if(pIdx >= count) return;
+                         const u = Math.random();
+                         const v = Math.random();
+                         const theta = 2 * Math.PI * u;
+                         const phi = Math.acos(2 * v - 1);
+                         const rad = r * Math.cbrt(Math.random());
+                         const x = cx + rad * Math.sin(phi) * Math.cos(theta);
+                         const y = cy + rad * Math.sin(phi) * Math.sin(theta);
+                         const z = cz + rad * Math.cos(phi);
+                         positions[pIdx*3] = x;
+                         positions[pIdx*3+1] = y;
+                         positions[pIdx*3+2] = z;
+                         setPColor(pIdx, color.r, color.g, color.b);
+                         pIdx++;
+                     }
+                };
+
+                // Helper to add cylinder
+                const addCylinder = (cx, yMin, yMax, r, color, num) => {
+                     for(let k=0; k<num; k++) {
+                         if(pIdx >= count) return;
+                         const angle = Math.random() * Math.PI * 2;
+                         const rad = r * Math.sqrt(Math.random());
+                         const y = yMin + Math.random() * (yMax - yMin);
+                         positions[pIdx*3] = cx + rad * Math.cos(angle);
+                         positions[pIdx*3+1] = y;
+                         positions[pIdx*3+2] = rad * Math.sin(angle);
+                         setPColor(pIdx, color.r, color.g, color.b);
+                         pIdx++;
+                     }
+                };
+                
+                // Colors
+                const cRed = {r:1.0, g:0.0, b:0.0};
+                const cWhite = {r:1.0, g:1.0, b:1.0};
+                const cBlack = {r:0.1, g:0.1, b:0.1};
+                const cSkin = {r:1.0, g:0.8, b:0.6};
+                
+                // --- Build Santa (approx 18k particles) ---
+                // Boots
+                addCylinder(-1.5, -6, -4, 1.2, cBlack, 1000);
+                addCylinder(1.5, -6, -4, 1.2, cBlack, 1000);
+                // Legs
+                addCylinder(-1.5, -4, 0, 1.3, cRed, 2000);
+                addCylinder(1.5, -4, 0, 1.3, cRed, 2000);
+                // Torso (Fat)
+                addCylinder(0, 0, 4, 3.5, cRed, 6000);
+                // Belt
+                addCylinder(0, 0, 0.5, 3.6, cBlack, 1000);
+                // Head
+                addSphere(0, 5, 0, 1.8, cSkin, 2000);
+                // Beard
+                addSphere(0, 4, 1.5, 1.5, cWhite, 2000);
+                // Hat (Cone approximation)
+                for(let k=0; k<3000; k++) {
+                     if(pIdx >= count) break;
+                     const h = Math.random() * 4; // 0 to 4
+                     const r = (1 - h/4) * 2.0;
+                     const angle = Math.random() * Math.PI * 2;
+                     const rad = r * Math.sqrt(Math.random());
+                     positions[pIdx*3] = rad * Math.cos(angle);
+                     positions[pIdx*3+1] = 6 + h;
+                     positions[pIdx*3+2] = rad * Math.sin(angle);
+                     setPColor(pIdx, 1.0, 0.0, 0.0);
+                     pIdx++;
+                }
+                
+                // --- Full Screen Snow (Remaining particles) ---
+                for(let i=pIdx; i<count; i++) {
+                     positions[i*3] = (Math.random()-0.5) * 100;
+                     positions[i*3+1] = (Math.random()-0.5) * 60; // Height spread
+                     positions[i*3+2] = (Math.random()-0.5) * 50;
+                     setPColor(i, 1.0, 1.0, 1.0);
+                }
+
+            } else if (type === 'text') {
+                if (!font) {
+                    console.warn("Font not loaded yet, cannot set text shape");
+                    return;
+                }
+                
+                const textGeo = new TextGeometry('Merry\nChristmas', {
+                     font: font,
+                     size: 3.5,
+                     height: 0.5,
+                     curveSegments: 12,
+                     bevelEnabled: true,
+                     bevelThickness: 0.1,
+                     bevelSize: 0.05,
+                     bevelOffset: 0,
+                     bevelSegments: 5
+                 });
+                 textGeo.center();
+                 
+                 const posAttr = textGeo.attributes.position;
+                 const pCount = posAttr.count;
+                 
+                 console.log(`Text generated with ${pCount} vertices for ${count} particles`);
+
+                 if (pCount === 0) {
+                     console.error("Text geometry has 0 vertices!");
+                     return;
+                 }
+                 
+                 for(let i=0; i<count; i++) {
+                     // Sample vertices cyclically
+                     const srcIdx = i % pCount;
+                     
+                     if (isNaN(srcIdx)) {
+                         console.error("NaN index encountered");
+                         continue;
+                     }
+
+                     positions[i*3] = posAttr.getX(srcIdx) * 1.5; // Scale up slightly
+                     positions[i*3+1] = posAttr.getY(srcIdx) * 1.5;
+                     positions[i*3+2] = posAttr.getZ(srcIdx) * 1.5;
+                     
+                     // Add very slight scatter for organic feel, but much tighter
+                     if (i >= pCount) {
+                         positions[i*3] += (Math.random()-0.5) * 0.1;
+                         positions[i*3+1] += (Math.random()-0.5) * 0.1;
+                         positions[i*3+2] += (Math.random()-0.5) * 0.1;
+                     }
+
+                     // Rich Gold / Warm Colors
+                     // Main Gold: 1.0, 0.84, 0.0
+                     // Highlights: White
+                     // Deep: Reddish Gold
+                     
+                     const rnd = Math.random();
+                     if (rnd > 0.8) {
+                         // Sparkle White
+                         setPColor(i, 1.0, 1.0, 1.0);
+                     } else if (rnd > 0.3) {
+                         // Classic Gold
+                         setPColor(i, 1.0, 0.85, 0.2); 
+                     } else {
+                         // Deep Warm Gold/Orange
+                         setPColor(i, 1.0, 0.6, 0.1);
+                     }
+                 }
+                 
+            } else if (type === 'sphere') {
+                const radius = 9;
+                for (let i = 0; i < count; i++) {
+                    const phi = Math.acos(-1 + (2 * i) / count);
+                    const theta = Math.sqrt(count * Math.PI) * phi;
+                    
+                    positions[i*3] = radius * Math.cos(theta) * Math.sin(phi);
+                    positions[i*3+1] = radius * Math.sin(theta) * Math.sin(phi);
+                    positions[i*3+2] = radius * Math.cos(phi);
+                    
+                    // Icy Blue/White
+                    setPColor(i, 0.6, 0.8 + Math.random()*0.2, 1.0);
+                }
+            } else if (type === 'star') {
+                for (let i = 0; i < count; i++) {
+                    const u = Math.random() * Math.PI * 2;
+                    const v = Math.random() * Math.PI;
+                    const r = 10 + 5 * Math.sin(5 * u) * Math.sin(5 * v);
+                    
+                    positions[i*3] = r * Math.sin(v) * Math.cos(u);
+                    positions[i*3+1] = r * Math.sin(v) * Math.sin(u);
+                    positions[i*3+2] = r * Math.cos(v);
+                    
+                    // Golden
+                    setPColor(i, 1.0, 0.8 + Math.random()*0.2, 0.2);
+                }
+            } else if (type === 'heart') {
+                for (let i = 0; i < count; i++) {
+                   const t = Math.PI * (Math.random() - 0.5); 
+                   const u = 2 * Math.PI * Math.random(); 
+                   const scale = 0.8;
+                   const x = 16 * Math.pow(Math.sin(u), 3);
+                   const y = 13 * Math.cos(u) - 5 * Math.cos(2*u) - 2 * Math.cos(3*u) - Math.cos(4*u);
+                   const z = t * 10; 
+
+                   positions[i*3] = x * scale * (0.8 + Math.random()*0.2);
+                   positions[i*3+1] = (y + 5) * scale * (0.8 + Math.random()*0.2); // Shifted up by 5
+                   positions[i*3+2] = (Math.random() - 0.5) * 5; 
+                   
+                   // Pink/Red
+                   setPColor(i, 1.0, 0.2 + Math.random()*0.3, 0.4 + Math.random()*0.2);
+                }
+            }
+
+            // Update UI State
+            document.querySelectorAll('.btn-grid button').forEach(b => b.classList.remove('active'));
+            const btn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes(type));
+            if(btn) btn.classList.add('active');
+        }
+
+        // Expose setShape to window so HTML buttons can access it
+        window.setShape = setShape;
+
+        // Toggle UI Logic
+        window.toggleUI = function() {
+            const container = document.getElementById('ui-container');
+            const btn = document.getElementById('toggle-ui');
+            container.classList.toggle('collapsed');
+            
+            if(container.classList.contains('collapsed')) {
+                // Gear Icon SVG
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
+            } else {
+                // Minus Icon SVG
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>';
+            }
+        }
+
+        // --- Drawing Logic - Restored ---
+        function setCustomShape(points) {
+             const positions = targetPositions;
+             const count = CONFIG.particleCount;
+             
+             // Resample points to get enough for all particles
+             if (points.length < 2) return;
+             
+             // Calculate total length of drawn path
+             let totalLen = 0;
+             const segLens = [];
+             for(let i=0; i<points.length-1; i++) {
+                 const dx = points[i+1].x - points[i].x;
+                 const dy = points[i+1].y - points[i].y;
+                 const d = Math.sqrt(dx*dx + dy*dy);
+                 totalLen += d;
+                 segLens.push(d);
+             }
+             
+             // Distribute particles along path
+             for(let i=0; i<count; i++) {
+                 const t = Math.random() * totalLen;
+                 let currLen = 0;
+                 let segIdx = 0;
+                 for(let j=0; j<segLens.length; j++) {
+                     if (currLen + segLens[j] >= t) {
+                         segIdx = j;
+                         break;
+                     }
+                     currLen += segLens[j];
+                 }
+                 
+                 const segT = (t - currLen) / segLens[segIdx];
+                 const p1 = points[segIdx];
+                 const p2 = points[segIdx+1];
+                 
+                 // Map 2D screen coords (0..1) to 3D world coords
+                 // Screen: 0,0 top-left -> 1,1 bottom-right
+                 // World: -Aspect*H/2 .. +Aspect*H/2, -H/2 .. +H/2
+                 
+                 // Assume camera at z=25, looking at 0,0,0
+                 // Visible height at z=0: 2 * tan(fov/2) * dist
+                 const dist = camera.position.z;
+                 const vFOV = THREE.MathUtils.degToRad(camera.fov);
+                 const visibleHeight = 2 * Math.tan(vFOV / 2) * dist;
+                 const visibleWidth = visibleHeight * camera.aspect;
+                 
+                 const wx = (p1.x + (p2.x - p1.x)*segT - 0.5) * visibleWidth;
+                const wy = -(p1.y + (p2.y - p1.y)*segT - 0.5) * visibleHeight; // Flip Y
+                
+                // Tighten the drawing - reduce scatter
+                positions[i*3] = wx + (Math.random()-0.5)*0.1;
+                positions[i*3+1] = wy + (Math.random()-0.5)*0.1;
+                positions[i*3+2] = (Math.random()-0.5)*0.1; // Almost flat
+                
+                // Color: Rainbow or Fire
+                 targetColors[i*3] = 1.0;
+                 targetColors[i*3+1] = 0.5 + Math.random()*0.5;
+                 targetColors[i*3+2] = 0.0;
+             }
+        }
+
+        function setupDrawing() {
+            const canvas = document.getElementById('draw-canvas');
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#ffaa00';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            
+            let isDrawing = false;
+            let points = [];
+            
+            const start = (e) => {
+                isDrawing = true;
+                points = [];
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                ctx.moveTo(x, y);
+                points.push({x: x/canvas.width, y: y/canvas.height});
+            };
+            
+            const move = (e) => {
+                if (!isDrawing) return;
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                points.push({x: x/canvas.width, y: y/canvas.height});
+            };
+            
+            const end = () => {
+                if (!isDrawing) return;
+                isDrawing = false;
+                canvas.style.display = 'none';
+                processDrawnShape(points);
+                
+                // Remove listeners to cleanup
+                canvas.removeEventListener('mousedown', start);
+                canvas.removeEventListener('mousemove', move);
+                canvas.removeEventListener('mouseup', end);
+                canvas.removeEventListener('touchstart', start);
+                canvas.removeEventListener('touchmove', move);
+                canvas.removeEventListener('touchend', end);
+            };
+            
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', end);
+            
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchmove', move, {passive: false});
+            canvas.addEventListener('touchend', end);
+        }
+
+        // Expose setupDrawing to window
+        window.setupDrawing = setupDrawing;
+
+        function processDrawnShape(points) {
+            savedDrawnPoints = points; // Save for later
+            setCustomShape(points);
+            appState = 'DRAWN';
+            
+            // Reset rotation so drawing is visible head-on
+            scene.rotation.set(0, 0, 0);
+            handRotationVelX = 0;
+            handRotationVelY = 0;
+        }
+
+
+        // --- UI Logic ---
+        function setupUI() {
+            document.getElementById('colorPicker').addEventListener('input', (e) => {
+                const hex = e.target.value;
+                const c = new THREE.Color(hex);
+                // Override target colors for current shape
+                for(let i=0; i<CONFIG.particleCount; i++) {
+                    targetColors[i*3] = c.r;
+                    targetColors[i*3+1] = c.g;
+                    targetColors[i*3+2] = c.b;
+                }
+            });
+
+            document.getElementById('densitySlider').addEventListener('input', (e) => {
+                CONFIG.particleSize = 0.15 * parseFloat(e.target.value);
+            });
+            
+            // setupDrawing(); // Removed
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // --- State Transition Logic ---
+            if (appState === 'TREE') {
+                // If hand is opened aggressively
+                if (handOpenness > 0.6) {
+                    // Trigger Explosion -> Box
+                    setShape('box');
+                    appState = 'BOX';
+                    stateTimer = time;
+                    console.log("State: TREE -> BOX");
+                }
+            } else if (appState === 'BOX') {
+                // Wait for ~4 seconds then reveal content
+                if ((time - stateTimer) > 4.0) {
+                    if (savedDrawnPoints && savedDrawnPoints.length > 0) {
+                        // Priority: Show User Drawing
+                        setCustomShape(savedDrawnPoints);
+                        appState = 'DRAWN';
+                        
+                        // Reset rotation to show drawing clearly
+                        scene.rotation.set(0, 0, 0);
+                        handRotationVelX = 0;
+                        handRotationVelY = 0;
+                        
+                        console.log("State: BOX -> DRAWN (User Shape)");
+                    } else {
+                        // Default: Santa + Snow
+                        setShape('santa');
+                        appState = 'SANTA';
+                        console.log("State: BOX -> SANTA");
+                    }
+                }
+            } else if (appState === 'SANTA') {
+                 // Animate Snow (Assume snow starts after 20000, roughly based on Santa gen)
+                 const snowStart = 20000; 
+                 const positions = particles.geometry.attributes.position.array;
+                 
+                 for(let i=snowStart; i<CONFIG.particleCount; i++) {
+                      targetPositions[i*3+1] -= 0.05; // Fall speed
+                      
+                      // Wrap around
+                      if(targetPositions[i*3+1] < -30) {
+                          targetPositions[i*3+1] = 30;
+                          // Instantly reset current position to top to avoid streak
+                          positions[i*3+1] = 30;
+                      }
+                 }
+            }
+            
+            // --- Hand Rotation & Scale Logic ---
+            // Damping rotation
+            scene.rotation.y += handRotationVelY;
+            scene.rotation.x += handRotationVelX;
+            
+            handRotationVelY *= 0.92; // Friction
+            handRotationVelX *= 0.92; // Friction
+
+            // Smooth Scale
+            currentScale += (targetScale - currentScale) * 0.1;
+            scene.scale.setScalar(currentScale);
+
+            material.uniforms.uTime.value = time;
+            material.uniforms.uSize.value = CONFIG.particleSize * window.innerHeight; 
+
+            // Physics & Morphing Logic
+            const positions = geometry.attributes.position.array;
+            const colors = geometry.attributes.color.array;
+            const diffForce = parseFloat(document.getElementById('diffusionSlider').value);
+            
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                let tx = targetPositions[ix];
+                let ty = targetPositions[iy];
+                let tz = targetPositions[iz];
+
+                // 1. Hand Diffusion Effect
+                if (handOpenness > 0.1 && appState !== 'BOX') { // Reduce diffusion when in box mode to allow shape to form
+                     const noiseScale = handOpenness * 10.0 * diffForce;
+                     tx += (Math.sin(time + i) * noiseScale);
+                     ty += (Math.cos(time + i * 0.5) * noiseScale);
+                     tz += (Math.sin(time * 0.5 + i) * noiseScale);
+                }
+
+                // 2. Color Morphing
+                colors[ix] += (targetColors[ix] - colors[ix]) * 0.05;
+                colors[iy] += (targetColors[iy] - colors[iy]) * 0.05;
+                colors[iz] += (targetColors[iz] - colors[iz]) * 0.05;
+
+                // 3. Position Morphing
+                const speed = CONFIG.lerpSpeed + (handOpenness * 0.05); 
+                
+                positions[ix] += (tx - positions[ix]) * speed;
+                positions[iy] += (ty - positions[iy]) * speed;
+                positions[iz] += (tz - positions[iz]) * speed;
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+            geometry.attributes.color.needsUpdate = true;
+            
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- MediaPipe Hands Setup ---
+        const videoElement = document.getElementById('video-feed');
+        const statusElement = document.getElementById('handStatus');
+
+        function onResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                statusElement.innerText = "Hand Detected ✋";
+                statusElement.style.color = "#00ff88";
+
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // 1. Detect Openness
+                const wrist = landmarks[0];
+                const tips = [4, 8, 12, 16, 20];
+                let avgDist = 0;
+                
+                tips.forEach(idx => {
+                    const dx = landmarks[idx].x - wrist.x;
+                    const dy = landmarks[idx].y - wrist.y;
+                    avgDist += Math.sqrt(dx*dx + dy*dy);
+                });
+                avgDist /= 5;
+
+                let rawOpenness = (avgDist - 0.15) / (0.35 - 0.15);
+                rawOpenness = Math.max(0, Math.min(1, rawOpenness));
+                
+                handOpenness += (rawOpenness - handOpenness) * 0.1;
+
+                // 2. Hand Position & Rotation & Scale
+                const currentHandX = landmarks[9].x; // Middle finger knuckle X (0..1)
+                const currentHandY = landmarks[9].y; // Middle finger knuckle Y (0..1)
+                
+                if (lastHandX !== null && lastHandY !== null) {
+                    // Detect swipe velocity
+                    const deltaX = currentHandX - lastHandX;
+                    const deltaY = currentHandY - lastHandY;
+                    
+                    // Swipe Left/Right -> Rotate Y
+                    handRotationVelY = -deltaX * 1.0; 
+                    
+                    // Swipe Up/Down -> Rotate X
+                    handRotationVelX = -deltaY * 1.0;
+                }
+                lastHandX = currentHandX;
+                lastHandY = currentHandY;
+
+                // 3. Hand Size -> Scene Scale
+                // Distance between Wrist (0) and Middle Finger MCP (9)
+                const wx = landmarks[0].x;
+                const wy = landmarks[0].y;
+                const mx = landmarks[9].x;
+                const my = landmarks[9].y;
+                const dist = Math.sqrt((mx-wx)*(mx-wx) + (my-wy)*(my-wy));
+                
+                // Typical dist: Far ~0.1, Close ~0.3-0.4
+                // Map 0.1->0.2 (dist) to 0.5->2.0 (scale)
+                // Clamp distance to a reasonable range
+                const clampedDist = Math.max(0.1, Math.min(0.4, dist));
+                // Normalize to 0..1
+                const sizeFactor = (clampedDist - 0.1) / 0.3; 
+                
+                // Map to scale 0.5 to 2.5
+                targetScale = 0.5 + sizeFactor * 2.0;
+
+                // Update hand position for physics (optional)
+                const hx = (0.5 - landmarks[9].x) * 60;
+                const hy = (0.5 - landmarks[9].y) * 40;
+                handPosition.set(hx, hy, 0);
+
+            } else {
+                statusElement.innerText = "No hand detected...";
+                statusElement.style.color = "#ffaa00";
+                handOpenness += (0 - handOpenness) * 0.05;
+                lastHandX = null; // Reset swipe tracking
+                lastHandY = null;
+            }
+        }
+
+        // Initialize MediaPipe and Three.js after window load
+        window.addEventListener('load', () => {
+            init(); // Start Three.js
+            
+            // Start MediaPipe
+            if (typeof window.Hands === 'function') {
+                const hands = new window.Hands({locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
+                }});
+
+                hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                hands.onResults(onResults);
+
+                const cameraUtils = new window.Camera(videoElement, {
+                    onFrame: async () => {
+                        await hands.send({image: videoElement});
+                    },
+                    width: 320,
+                    height: 240
+                });
+                
+                cameraUtils.start();
+            } else {
+                console.error("MediaPipe Hands failed to load.");
+                statusElement.innerText = "Error: MediaPipe not loaded. Check connection.";
+                statusElement.style.color = "red";
+            }
+        });
+
+    </script>
+</body>
+</html>
