@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姑苏韵 | 苏州文旅</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Preload fonts if available, otherwise fallback to system serif -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- SVG Filters for Ink Effect -->
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+        <defs>
+            <filter id="ink-spread-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="4" result="turbulence" />
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="40" xChannelSelector="R" yChannelSelector="G" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+                <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -2" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Loading Screen -->
+    <div id="loader" class="loader">
+        <div class="ink-drop"></div>
+        <div class="loader-text">姑苏印象</div>
+    </div>
+
+    <!-- 3D Scroll Intro Section -->
+    <div id="scroll-intro" class="scroll-intro-container">
+        <div class="scroll-wrapper">
+            <!-- Left Axis -->
+            <div class="scroll-axis axis-left">
+                <div class="axis-knob top"></div>
+                <div class="axis-body"></div>
+                <div class="axis-knob bottom"></div>
+            </div>
+            
+            <!-- Central Paper Content -->
+            <div class="scroll-paper">
+                <div class="paper-inner">
+                    <!-- Image Content -->
+                    <img src="images/scroll-content.jpg" class="scroll-content-img" alt="姑苏韵卷轴内容">
+
+                    <!-- Text Overlay -->
+                    <div class="scroll-text-overlay">
+                        <div class="scroll-title">姑苏韵</div>
+                        <div class="scroll-label label-left">拙政园</div>
+                        <div class="scroll-label label-center">寒山寺</div>
+                        <div class="scroll-label label-right">平江路</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Axis -->
+            <div class="scroll-axis axis-right">
+                <div class="axis-knob top"></div>
+                <div class="axis-body"></div>
+                <div class="axis-knob bottom"></div>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            <div class="mouse-icon"></div>
+            <span>滚动展开画卷</span>
+        </div>
+
+        <!-- Welcome Text (Final Reveal) -->
+        <div class="intro-welcome-text">欢迎来到苏州</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="glass-nav">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <svg class="logo-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+                    <path d="M32 4C16.5 4 4 16.5 4 32C4 47.5 16.5 60 32 60C47.5 60 60 47.5 60 32" stroke-width="2"/>
+                    <path d="M32 10V54M10 32H54" stroke-width="1" stroke-opacity="0.5"/>
+                    <circle cx="32" cy="32" r="8" stroke-width="1"/>
+                </svg>
+                <span class="logo-text">姑苏韵</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="#impression" class="nav-item" data-text="印象">姑苏印象</a></li>
+                <li><a href="#culture" class="nav-item" data-text="瑰宝">文化瑰宝</a></li>
+                <li><a href="#gardens" class="nav-item" data-text="园林">园林胜景</a></li>
+                <li><a href="#cuisine" class="nav-item" data-text="美食">苏式佳肴</a></li>
+            </ul>
+
+            <button class="mobile-menu-btn" aria-label="Menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-drawer">
+        <div class="drawer-content">
+            <a href="#impression" class="drawer-link">姑苏印象</a>
+            <a href="#culture" class="drawer-link">文化瑰宝</a>
+            <a href="#gardens" class="drawer-link">园林胜景</a>
+            <a href="#cuisine" class="drawer-link">苏式佳肴</a>
+        </div>
+        <div class="drawer-bg-pattern"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-bg"></div>
+            <!-- Corner Lattice Pattern (Top Right) -->
+            <div class="corner-lattice top-right">
+                <svg viewBox="0 0 100 100" fill="none" stroke="currentColor">
+                    <path d="M0 0 H100 V100" stroke-width="1"/>
+                    <rect x="20" y="20" width="60" height="60" stroke-width="1"/>
+                    <circle cx="50" cy="50" r="20" stroke-width="1"/>
+                    <path d="M50 20 V80 M20 50 H80" stroke-width="1"/>
+                </svg>
+            </div>
+            
+            <div class="hero-content">
+                <div class="octagonal-window-icon fade-in-up">
+                    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <!-- Outer Octagon -->
+                        <polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" stroke-width="1.5"/>
+                        <!-- Inner Octagon -->
+                        <polygon points="34,14 66,14 86,34 86,66 66,86 34,86 14,66 14,34" stroke-width="1"/>
+                        
+                        <!-- Center Motif (Ruyi Pattern) -->
+                        <circle cx="50" cy="50" r="3" />
+                        <!-- Top Ruyi -->
+                        <path d="M50 46 Q44 43 44 36 Q44 30 50 30 Q56 30 56 36 Q56 43 50 46" />
+                        <!-- Bottom Ruyi -->
+                        <path d="M50 54 Q44 57 44 64 Q44 70 50 70 Q56 70 56 64 Q56 57 50 54" />
+                        <!-- Left Ruyi -->
+                        <path d="M46 50 Q43 56 36 56 Q30 56 30 50 Q30 44 36 44 Q43 44 46 50" />
+                        <!-- Right Ruyi -->
+                        <path d="M54 50 Q57 56 64 56 Q70 56 70 50 Q70 44 64 44 Q57 44 54 50" />
+                        
+                        <!-- Cardinal Ovals -->
+                        <rect x="47" y="17" width="6" height="10" rx="3" />
+                        <rect x="47" y="73" width="6" height="10" rx="3" />
+                        <rect x="17" y="47" width="10" height="6" rx="3" />
+                        <rect x="73" y="47" width="10" height="6" rx="3" />
+                        
+                        <!-- Corner Fretwork (Simplified Geometric) -->
+                        <path d="M64 26 L 76 26 L 76 38" />
+                        <path d="M64 74 L 76 74 L 76 62" />
+                        <path d="M36 74 L 24 74 L 24 62" />
+                        <path d="M36 26 L 24 26 L 24 38" />
+                    </svg>
+                </div>
+                <h1 class="hero-title fade-in-up">
+                    <span class="char" style="animation-delay: 0.1s">姑</span>
+                    <span class="char" style="animation-delay: 0.2s">苏</span>
+                    <span class="char" style="animation-delay: 0.3s">韵</span>
+                </h1>
+                <p class="hero-subtitle fade-in-up" style="animation-delay: 0.6s">烟雨画江南，园林梦姑苏</p>
+            </div>
+            <div class="scroll-indicator">
+                <span class="scroll-text">这也是江南</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
+
+        <!-- Section 1: Impression -->
+        <section id="impression" class="content-section">
+            <div class="section-separator top">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+                </svg>
+            </div>
+            
+            <div class="section-divider">
+                <svg class="window-pattern spinning" viewBox="0 0 100 100">
+                    <rect x="20" y="20" width="60" height="60" rx="4" stroke="currentColor" fill="none"/>
+                    <circle cx="50" cy="50" r="20" stroke="currentColor" fill="none"/>
+                    <path d="M50 20V80 M20 50H80" stroke="currentColor"/>
+                </svg>
+            </div>
+            <div class="container">
+                <div class="text-block" data-scroll>
+                    <h2 class="section-title">姑苏印象</h2>
+                    <p class="section-subtitle">枕河人家，一梦千年</p>
+                    <div class="vertical-text-container">
+                        <p class="section-desc vertical-text">
+                            君到姑苏见，人家尽枕河。<br>
+                            古宫闲地少，水港小桥多。<br>
+                            夜市卖菱藕，春船载绮罗。<br>
+                            遥知未眠月，乡思在渔歌。
+                        </p>
+                    </div>
+                    <p class="section-desc">
+                        苏州，古称吴，简称为苏，又称姑苏、平江，是国家历史文化名城和风景旅游城市。
+                        这里有着2500多年的建城史，城内河道纵横，又称为水都、水城、水乡。
+                        漫步在青石板路上，仿佛能听到千年前的吴侬软语。
+                    </p>
+                    <button class="btn-secondary ripple-btn">
+                        <span>阅览图集</span>
+                    </button>
+                </div>
+                <div class="card-block grid-2" data-scroll>
+                    <div class="frosted-card small">
+                        <img src="images/pingjiang-road.jpg" alt="平江路" class="card-image">
+                        <div class="card-content">
+                            <h3>平江路</h3>
+                            <p>半座姑苏旧梦</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>地址：</strong>苏州市姑苏区白塔东路65号</li>
+                                    <li><strong>特色：</strong>水陆并行，河街相邻，最典型的苏州古街。</li>
+                                    <li><strong>打卡点：</strong>猫的天空之城、琵琶语评弹馆。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/shantang-street.jpg" alt="山塘街" class="card-image">
+                        <div class="card-content">
+                            <h3>山塘街</h3>
+                            <p>姑苏第一名街，七里山塘到虎丘。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>地址：</strong>苏州市姑苏区广济路新民桥下</li>
+                                    <li><strong>特色：</strong>夜景如梦，红灯笼映照下的江南水乡。</li>
+                                    <li><strong>打卡点：</strong>通贵桥、古戏台、游船码头。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small" data-bg="images/jinji-lake.jpg">
+                        <img src="images/jinji-lake.jpg" alt="金鸡湖" class="card-image">
+                        <div class="card-content">
+                            <h3>金鸡湖</h3>
+                            <p>现代苏州的时尚地标，传统与摩登的交响。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>地址：</strong>苏州市工业园区钟园路747号</li>
+                                    <li><strong>特色：</strong>东方之门地标，现代化城市天际线与湖景交融。</li>
+                                    <li><strong>打卡点：</strong>月光码头、诚品书店、东方之门。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/hanshan-temple.jpg" alt="寒山寺" class="card-image">
+                        <div class="card-content">
+                            <h3>寒山寺</h3>
+                            <p>姑苏城外寒山寺，夜半钟声到客船。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>地址：</strong>苏州市姑苏区寒山寺弄24号</li>
+                                    <li><strong>特色：</strong>千年古刹，钟声闻名天下，祈福胜地。</li>
+                                    <li><strong>打卡点：</strong>普明宝塔、钟楼、诗碑。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Culture -->
+        <section id="culture" class="content-section">
+            <div class="section-divider">
+                <svg class="window-pattern spinning" viewBox="0 0 100 100">
+                    <rect x="25" y="25" width="50" height="50" transform="rotate(45 50 50)" stroke="currentColor" fill="none"/>
+                    <circle cx="50" cy="50" r="15" stroke="currentColor" fill="none"/>
+                </svg>
+            </div>
+            
+            <div class="container">
+                <div class="card-block grid-2" data-scroll>
+                    <div class="frosted-card small">
+                        <img src="images/kunqu-opera.jpg" alt="昆曲" class="card-image">
+                        <div class="card-content">
+                            <h3>昆曲</h3>
+                            <p>百戏之祖，世界非物质文化遗产。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>唱腔婉转，表演细腻，演绎才子佳人。</li>
+                                    <li><strong>代表剧目：</strong>《牡丹亭》、《长生殿》</li>
+                                    <li><strong>体验场馆：</strong>苏州昆剧院、中国昆曲博物馆</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/pingtan.jpg" alt="评弹" class="card-image">
+                        <div class="card-content">
+                            <h3>评弹</h3>
+                            <p>吴侬软语，弦索叮咚，中国最美的声音。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>抑扬顿挫，说嘘弹唱，如珠走玉盘。</li>
+                                    <li><strong>代表剧目：</strong>《珍珠塔》、《三笑》</li>
+                                    <li><strong>体验场馆：</strong>光裕书厅、平江路茶馆</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/su-embroidery.jpg" alt="苏绣" class="card-image">
+                        <div class="card-content">
+                            <h3>苏绣</h3>
+                            <p>以针作画，巧夺天工。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>图案秀丽，色彩雅洁，针法活泼，精细雅洁。</li>
+                                    <li><strong>代表技艺：</strong>双面绣、乱针绣</li>
+                                    <li><strong>体验场馆：</strong>苏州刺绣研究所、镇湖刺绣艺术馆</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-block" data-scroll>
+                    <h2 class="section-title">文化瑰宝</h2>
+                    <p class="section-subtitle">吴侬软语，雅韵流芳</p>
+                    <p class="section-desc">
+                        昆曲，被誉为“百戏之祖”，以其细腻婉转的唱腔和优雅的表演著称。
+                        评弹，吴侬软语，弦索叮咚，讲述着江南的传奇故事。
+                        除此之外，苏绣等非物质文化遗产，
+                        共同构成了苏州深厚的文化底蕴。
+                    </p>
+                    <button class="btn-secondary ripple-btn">
+                        <span>探寻瑰宝</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Gardens -->
+        <section id="gardens" class="content-section">
+            <div class="section-separator top">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+                </svg>
+            </div>
+
+            <div class="section-divider">
+                <svg class="window-pattern spinning" viewBox="0 0 100 100">
+                    <path d="M50 10 L90 50 L50 90 L10 50 Z" stroke="currentColor" fill="none" />
+                    <circle cx="50" cy="50" r="25" stroke="currentColor" fill="none"/>
+                    <rect x="35" y="35" width="30" height="30" stroke="currentColor" fill="none"/>
+                </svg>
+            </div>
+            <div class="container">
+                <div class="text-block" data-scroll>
+                    <h2 class="section-title">园林胜景</h2>
+                    <p class="section-desc">
+                        “江南园林甲天下，苏州园林甲江南。”<br>
+                        拙政园的疏朗，留园的秀丽，网师园的精巧，狮子林的奇石。<br>
+                        咫尺之内再造乾坤，移步换景，蕴含着中国传统文化的深厚哲理。
+                    </p>
+                    <button class="btn-secondary ripple-btn">
+                        <span>游览园林</span>
+                    </button>
+                </div>
+                <div class="card-block grid-2" data-scroll>
+                    <div class="frosted-card small">
+                        <img src="images/humble-administrators-garden.jpg" alt="拙政园" class="card-image">
+                        <div class="card-content">
+                            <h3>拙政园</h3>
+                            <p>中国四大名园之首，以水见长。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>疏朗典雅，尽显明代园林旷远疏朗之风。</li>
+                                    <li><strong>开放时间：</strong>07:30-17:30</li>
+                                    <li><strong>门票价格：</strong>旺季 80元 / 淡季 70元</li>
+                                    <li><strong>交通指南：</strong>公交游1、游2、游5线；地铁4号线北寺塔站。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/lingering-garden.jpg" alt="留园" class="card-image">
+                        <div class="card-content">
+                            <h3>留园</h3>
+                            <p>建筑艺术精湛，冠绝江南。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>以厅堂宏敞华丽、庭院变幻多姿著称。</li>
+                                    <li><strong>开放时间：</strong>07:30-17:00</li>
+                                    <li><strong>门票价格：</strong>旺季 55元 / 淡季 45元</li>
+                                    <li><strong>交通指南：</strong>游1路、85路、317路至留园站。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/lion-grove-garden.jpg" alt="狮子林" class="card-image">
+                        <div class="card-content">
+                            <h3>狮子林</h3>
+                            <p>假山王国，迷宫般的石头世界。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>元代园林代表，禅意深远。</li>
+                                    <li><strong>开放时间：</strong>07:30-17:30</li>
+                                    <li><strong>门票价格：</strong>旺季 40元 / 淡季 30元</li>
+                                    <li><strong>交通指南：</strong>公交游1、游2、游5线；地铁4号线北寺塔站。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/canglang-pavilion.jpg" alt="沧浪亭" class="card-image">
+                        <div class="card-content">
+                            <h3>沧浪亭</h3>
+                            <p>最古老的苏州园林，清幽古朴。</p>
+                            <div class="card-hidden-info">
+                                <ul>
+                                    <li><strong>简介：</strong>未入园先见水，借景艺术之典范。</li>
+                                    <li><strong>开放时间：</strong>07:30-17:30</li>
+                                    <li><strong>门票价格：</strong>旺季 20元 / 淡季 15元</li>
+                                    <li><strong>交通指南：</strong>公交1路、5路、101路至工人文化宫站。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Cuisine -->
+        <section id="cuisine" class="content-section reverse">
+            <div class="section-divider">
+                <svg class="window-pattern spinning" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" stroke="currentColor" fill="none" stroke-dasharray="5,5"/>
+                    <rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)" stroke="currentColor" fill="none"/>
+                </svg>
+            </div>
+            <div class="container">
+                <div class="card-block grid-2" data-scroll>
+                    <div class="frosted-card small">
+                        <img src="images/squirrel-fish.jpg" alt="松鼠桂鱼" class="card-image">
+                        <div class="card-content">
+                            <h3>松鼠桂鱼</h3>
+                            <p>乾隆下江南的传说佳肴，外脆里嫩，酸甜适口。</p>
+                        </div>
+                    </div>
+                    <div class="frosted-card small">
+                        <img src="images/suzhou-noodles.jpg" alt="苏式面" class="card-image">
+                        <div class="card-content">
+                            <h3>苏式面</h3>
+                            <p>汤清味鲜，面条细韧，浇头丰富，苏式生活的灵魂。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-block" data-scroll>
+                    <h2 class="section-title">苏式佳肴</h2>
+                    <p class="section-subtitle">舌尖上的姑苏</p>
+                    <p class="section-desc">
+                        "不时不食"是苏州人的饮食哲学。<br>
+                        苏帮菜讲究选料严谨、制作精细。<br>
+                        无论是名扬天下的松鼠桂鱼，<br>
+                        还是一碗最抚凡人心的苏式汤面，<br>
+                        都是对江南水乡最生动的诠释。
+                    </p>
+                     <ul class="feature-list" style="list-style: none; margin-bottom: 2rem;">
+                        <li style="margin-bottom: 10px;">• 饮食哲学：不时不食，顺应四季</li>
+                        <li style="margin-bottom: 10px;">• 烹饪特色：炖、焖、煨、焐，原汁原味</li>
+                        <li style="margin-bottom: 10px;">• 文化内涵：文人雅趣与市井烟火的共鸣</li>
+                    </ul>
+                    <button class="btn-secondary ripple-btn">
+                        <span>品尝美食</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="section-separator bottom">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Icon Output Showcase -->
+        <section class="icon-showcase">
+            <h2 class="section-title">图标设计规范</h2>
+            <p class="section-desc">新中式线性图标设计 (24px/48px) | PNG导出预览</p>
+            
+            <div class="icon-grid">
+                <!-- 姑苏印象 -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 28 Q24 10 44 28" stroke-linecap="round"/>
+                        <path d="M4 38 Q14 34 24 38 T44 38" stroke-opacity="0.6"/>
+                        <circle cx="24" cy="18" r="4"/>
+                    </svg>
+                    <span class="icon-label">平江路</span>
+                    <span class="icon-spec">姑苏印象 / 48px</span>
+                </div>
+                
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 12 L24 4 L44 12" stroke-linecap="round"/>
+                        <rect x="12" y="16" width="24" height="16" rx="4"/>
+                        <line x1="24" y1="16" x2="24" y2="32"/>
+                        <line x1="12" y1="32" x2="36" y2="32"/>
+                        <path d="M18 32 V36 M30 32 V36" />
+                    </svg>
+                    <span class="icon-label">山塘街</span>
+                    <span class="icon-spec">姑苏印象 / 48px</span>
+                </div>
+
+                <!-- 园林胜景 -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M24 10 Q14 10 14 24 Q14 38 24 38 Q34 38 34 24 Q34 10 24 10" />
+                        <path d="M24 10 V38 M14 24 H34" />
+                        <path d="M24 4 L24 10" />
+                        <path d="M18 34 L10 42 M30 34 L38 42" />
+                    </svg>
+                    <span class="icon-label">拙政园 (荷)</span>
+                    <span class="icon-spec">园林胜景 / 48px</span>
+                </div>
+
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M12 40 C6 35 10 25 8 15 C10 8 20 4 28 8 C35 10 42 15 40 25 C38 35 30 42 20 40 Z" stroke-linejoin="round"/>
+                        <circle cx="18" cy="18" r="3" />
+                        <circle cx="28" cy="28" r="2" />
+                    </svg>
+                    <span class="icon-label">留园 (石)</span>
+                    <span class="icon-spec">园林胜景 / 48px</span>
+                </div>
+
+                <!-- 文化瑰宝 -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 34 L24 40 L44 34" stroke-linecap="round"/>
+                        <path d="M4 34 Q24 4 44 34" fill="none"/>
+                        <path d="M24 38 L24 18 M14 36 L18 22 M34 36 L30 22" stroke-width="0.8"/>
+                    </svg>
+                    <span class="icon-label">昆曲 (扇)</span>
+                    <span class="icon-spec">文化瑰宝 / 48px</span>
+                </div>
+
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M24 8 C18 8 14 14 14 24 C14 34 18 40 24 40 C30 40 34 34 34 24 C34 14 30 8 24 8 Z" />
+                        <line x1="24" y1="8" x2="24" y2="40" />
+                        <line x1="14" y1="24" x2="34" y2="24" />
+                        <path d="M24 8 L24 2" stroke-width="2"/>
+                    </svg>
+                    <span class="icon-label">评弹 (琵琶)</span>
+                    <span class="icon-spec">文化瑰宝 / 48px</span>
+                </div>
+
+                <!-- 按钮图标 -->
+                 <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A6F7C" stroke-width="1.5">
+                        <path d="M2 12h20M2 12l6-6M22 12l-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="icon-label">通用箭头</span>
+                    <span class="icon-spec">按钮 / 24px</span>
+                </div>
+                 <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none" stroke="#5A6F7C" stroke-width="5">
+                        <path d="M10 60 L30 80 L70 80 L90 60 L50 60 Z" />
+                        <path d="M50 60 L50 20 L90 60" />
+                        <path d="M50 60 L50 30 L10 60" />
+                    </svg>
+                    <span class="icon-label">纸船</span>
+                    <span class="icon-spec">装饰 / 24px</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">姑苏韵</div>
+            <p>&copy; 2024 苏州文旅. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </button>
+
+    <!-- Attraction Detail Modal -->
+    <div id="cardModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+            </div>
+            <div class="modal-image-placeholder">实景图展示</div>
+            <div class="modal-desc"></div>
+            <div class="modal-footer">
+                <button class="btn-primary ripple-btn">查看更多</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+            <p>New Chinese Style Linear Icons</p>
+            
+            <div class="icon-grid">
+                <!-- Button Icon -->
+                <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A6F7C" stroke-width="1.5">
+                        <path d="M2 14l4 4h12l4-4l-10 0z" />
+                        <path d="M12 14V4l8 10" />
+                    </svg>
+                    <span class="icon-label">纸船 (Btn)</span>
+                    <span class="icon-spec">24px / 1.5px</span>
+                </div>
+                
+                <!-- Impression Icons -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 24 Q24 10 44 24" stroke-linecap="round"/>
+                        <path d="M4 34 Q14 30 24 34 T44 34" stroke-opacity="0.6"/>
+                    </svg>
+                    <span class="icon-label">平江路</span>
+                    <span class="icon-spec">48px / 1.2px</span>
+                </div>
+                
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 12 L24 4 L44 12" stroke-linecap="round"/>
+                        <rect x="18" y="16" width="12" height="16" rx="2"/>
+                    </svg>
+                    <span class="icon-label">山塘街</span>
+                    <span class="icon-spec">48px / 1.2px</span>
+                </div>
+
+                <!-- Garden Icons -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M24 8 L8 16 L40 16 Z"/>
+                        <rect x="12" y="16" width="4" height="16"/>
+                        <rect x="32" y="16" width="4" height="16"/>
+                        <path d="M4 32 H44"/>
+                    </svg>
+                    <span class="icon-label">园林</span>
+                    <span class="icon-spec">48px / 1.2px</span>
+                </div>
+
+                <!-- Culture Icons -->
+                <div class="icon-item">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#5A6F7C" stroke-width="1.2">
+                        <path d="M4 36 Q24 4 44 36" fill="none"/>
+                        <path d="M4 36 L44 36"/>
+                    </svg>
+                    <span class="icon-label">昆曲</span>
+                    <span class="icon-spec">48px / 1.2px</span>
+                </div>
+            </div>
+        </section>
